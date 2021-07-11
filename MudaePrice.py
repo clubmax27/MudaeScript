@@ -67,12 +67,9 @@ async def on_message(message):
 			await sendImMessage(character)
 
 
-		if color == 611623: #If message has a green bar (wish related)
+		if "Souhaité par" in message.content: #If message has a green bar (wish related)
 			character = embed["author"]["name"]
 			print(character)
-
-			if "Wishlist".upper() in character.upper(): #If someone uses $wishlist
-				return
 
 			if not marry_enabled:
 				return
@@ -80,7 +77,7 @@ async def on_message(message):
 			addCharacterToEmbedsStack((character, message))
 			await sendImMessage(character)
 
-			sleep(0.5)
+			sleep(0.8)
 			await message.add_reaction("jaichaud:849415484347645962") #Marry the character
 			marry_enabled = False
 
@@ -139,7 +136,7 @@ async def on_message(message):
 			for queueElement in embeds:
 				queueCharacter, queueMessage = queueElement
 				if queueCharacter == character:
-					sleep(0.5)
+					sleep(0.8)
 					await queueMessage.add_reaction("jaichaud:849415484347645962") #Marry the character
 					marry_enabled = False
 
@@ -190,7 +187,7 @@ async def on_reaction_add(reaction, user): #Kakera grabber
 
 		if color == 6753288 and ("kakera".upper() in str(reaction).upper()): #If the color is Bordeau (already married roll)
 			if message.reactions != []:
-				sleep(0.5)
+				sleep(0.8)
 				await message.add_reaction(message.reactions[0].emoji)
 				kakera_grabber_enabled = False
 				r = Timer(3*100*60.0, enableKakeraGrabber, ())
