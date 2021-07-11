@@ -5,13 +5,15 @@ from collections import deque
 from time import sleep
 import config
 import sqlite3
+from threading import Timer
 
 
 client = discord.Client()
 embeds = deque([], 10)
 acceptedChannels = [863116140795396116]
 PRICE_AUTOMARRY = 300
-marry_on_cooldown = True
+marry_on_cooldown = False
+kakera_grabber_enabled = True
 
 
 @client.event
@@ -22,6 +24,7 @@ async def on_ready():
 		CREATE TABLE IF NOT EXISTS roulette(
 		category TEXT,
     	character TEXT UNIQUE,
+    	gender INTEGER,
     	price INTEGER)
 	""")
 	conn.commit()
@@ -30,11 +33,15 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
+	#if message.embeds == [] or message.embeds[0].to_dict()["color"] == undefined:
+	#	return
+
 	#849723752065531945
 	#print(message.channel.id)
 	if message.embeds != [] and (message.channel.id == 849723752065531945):
 		embed = message.embeds[0].to_dict()
 
+		print(embed["color"])
 		if "Rank".upper() in embed["description"].upper(): #If message is an im message
 			return
 
@@ -76,17 +83,17 @@ async def on_message(message):
 		if not("Claim Rank" in embed["description"]): #If it's not an $im message, return
 			return
 
-		description = embed["description"].split("\n")
+		kakera_description = embed["description"].split("\n")
 
 		found = False
 		i = 0
-		while not found and i < len(description):
-			if description[i].find("**") != -1:
-				description = description[i]
+		while not found and i < len(kakera_description):
+			if kakera_description[i].find("**") != -1:
+				kakera_description = kakera_description[i]
 				found = True
 			i += 1
 
-		price = description #Keep the original description for future use
+		price = kakera_description #Keep the original description for future use
 		price = price[price.find("**") + 2:]
 		price = price[:price.find("**")]
 		price = str(math.floor(int(price) * 1.52)) #The price on Tijimu's server is higher for some reason
@@ -95,11 +102,31 @@ async def on_message(message):
 		MudaeChannel = client.get_channel(863116140795396116)
 		await MudaeChannel.send("GaybenSay " + character + " : " + price) #Say the price of the character
 
-		category = description.split("·")[0]
+
+		category = kakera_description.split("·")[0]
 		category = category[category.find("*") + 1:]
 		category = category[:category.find("*")]
 
-		addCharacterToDatabase(category, character, price)
+		gender_description = embed["description"].split("\n")
+
+		found = False
+		i = 0
+		while not found and i < len(gender_description):
+			if gender_description[i].find("<:male:452470164529872899>") != -1 or gender_description[i].find("<:female:452463537508450304>") != -1:
+				gender_description = gender_description[i]
+				found = True
+			i += 1
+
+		print(gender_description)
+
+		gender = 0
+		if gender_description.find("<:male:452470164529872899>") != - 1:
+			gender += 1
+		if gender_description.find("<:female:452463537508450304>") != - 1:
+			gender += 2
+
+
+		addCharacterToDatabase(category, character, gender, price)
 
 		if int(price) > PRICE_AUTOMARRY and not marry_on_cooldown: #If marry is available and the price is high enough
 			for queueElement in embeds:
@@ -112,7 +139,8 @@ async def on_message(message):
 @client.event
 async def on_reaction_add(reaction, user): #Kakera grabber
 	message = reaction.message
-	if message.embeds != [] and (message.channel.id == 849723752065531945) and user.id == 432610292342587392: #If message has an embed, in the right channel and from mudae
+	global kakera_grabber_enabled
+	if message.embeds != [] and (message.channel.id == 849723752065531945) and user.id == 432610292342587392 and kakera_grabber_enabled: #If message has an embed, in the right channel and from mudae
 		embed = message.embeds[0].to_dict()
 		color = embed["color"]
 
@@ -120,6 +148,14 @@ async def on_reaction_add(reaction, user): #Kakera grabber
 			if message.reactions != []:
 				sleep(0.5)
 				await message.add_reaction(message.reactions[0].emoji)
+				kakera_grabber_enabled = False
+				r = Timer(3*60*60.0, enableKakeraGrabber, ())
+				r.start()
+
+
+def enableKakeraGrabber():
+	global kakera_grabber_enabled
+	kakera_grabber_enabled = True
 
 
 def addCharacterToEmbedsStack(element):
@@ -132,16 +168,16 @@ async def sendImMessage(character):
 	await MudaeChannel.send('$im ' + character)
 
 
-def addCharacterToDatabase(category, character, price):
+def addCharacterToDatabase(category, character, gender, price):
 	conn = sqlite3.connect('mudae.db')
 	cursor = conn.cursor()
-	data = {"category" : category, "character" : character, "price" : price}
+	data = {"category" : category, "character" : character, "gender" : gender, "price" : price}
 
 	cursor.execute("""
-	INSERT INTO roulette(category, character, price) 
-	VALUES(:category, :character, :price)
+	INSERT INTO roulette(category, character, gender, price) 
+	VALUES(:category, :character, :gender, :price)
 	ON CONFLICT(character)
-	DO UPDATE SET price = VALUES(:price);""", data)
+	DO UPDATE SET price = :price;""", data)
 	conn.commit()
 
 
