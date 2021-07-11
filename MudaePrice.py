@@ -27,18 +27,34 @@ async def on_message(message):
 		if "Rang".upper() in embed["description"].upper():
 			return
 
-		character = embed["author"]["name"]
-		print(character)
+		color = embed["color"]
+		#print(color)
 
-		if "Wishlist".upper() in character.upper():
-			return
+		sleep(0.5)
 
-		global embeds
-		embeds.appendleft((character, message))
+		if color == 16751916: #Si le message est un roll
+			character = embed["author"]["name"]
+			print(character)
+
+			global embeds
+			embeds.appendleft((character, message))
+
+			MudaeChannel = client.get_channel(863116140795396116)
+			await MudaeChannel.send('$im ' + character)
 
 
-		MudaeChannel = client.get_channel(863116140795396116)
-		await MudaeChannel.send('$im ' + character)
+		if color == 611623:
+			character = embed["author"]["name"]
+			print(character)
+
+			if "Wishlist".upper() in character.upper(): #Si quelqu'un demande sa wishlist
+				return
+
+			await message.add_reaction(message.reactions[0].emoji)
+
+		if color == 6753288: #Si quelqu'un roll un perso déja capturé
+			if message.reactions != []:
+				await message.add_reaction(message.reactions[0].emoji)
 
 
 	if message.embeds != [] and (message.channel.id == 863116140795396116):
@@ -68,7 +84,7 @@ async def on_message(message):
 		MudaeChannel = client.get_channel(863116140795396116)
 		await MudaeChannel.send("GaybenSay " + character + " : " + price)
 
-		if int(price) > 200:
+		if int(price) > 300:
 			for queueElement in embeds:
 				queueCharacter, queueMessage = queueElement
 				if queueCharacter == character:
