@@ -34,8 +34,6 @@ async def on_message(message):
 		color = embed["color"]
 		#print(color)
 
-		sleep(0.5)
-
 		if color == 16751916: #If the message has a yellow bar (normal roll)
 			character = embed["author"]["name"]
 			print(character)
@@ -57,6 +55,7 @@ async def on_message(message):
 			if marry_on_cooldown:
 				return
 
+			sleep(0.5)
 			await message.add_reaction("jaichaud:849415484347645962")
 
 
@@ -101,11 +100,10 @@ async def on_reaction_add(reaction, user): #Kakera grabber
 	if message.embeds != [] and (message.channel.id == 849723752065531945) and user.id == 432610292342587392: #If message has an embed, in the right channel and from mudae
 		embed = message.embeds[0].to_dict()
 		color = embed["color"]
-		print("color : " + str(color))
 
-		if color == 6753288 and ("kakera".upper() in reaction.upper()): #If the color is Bordeau (already married roll)
-			sleep(0.5)
+		if color == 6753288 and ("kakera".upper() in str(reaction).upper()): #If the color is Bordeau (already married roll)
 			if message.reactions != []:
+				sleep(0.5)
 				await message.add_reaction(message.reactions[0].emoji)
 
 client.run(config.TOKEN)
