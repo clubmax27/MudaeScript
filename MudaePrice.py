@@ -12,8 +12,8 @@ client = discord.Client()
 embeds = deque([], 10)
 acceptedChannels = [863116140795396116]
 PRICE_AUTOMARRY = 300
-marry_on_cooldown = False
-kakera_grabber_enabled = True
+marry_enabled = False
+kakera_grabber_enabled = False
 
 
 @client.event
@@ -28,20 +28,29 @@ async def on_ready():
     	price INTEGER)
 	""")
 	conn.commit()
+
+	MudaeChannel = client.get_channel(849723752065531945)
+	#await MudaeChannel.send("$tu") #Say the price of the character
+
 	print('Logged on as', client.user)
 
 
 @client.event
 async def on_message(message):
+	global marry_enabled
+	global kakera_grabber_enabled
+
 	#if message.embeds == [] or message.embeds[0].to_dict()["color"] == undefined:
 	#	return
 
 	#849723752065531945
 	#print(message.channel.id)
-	if message.embeds != [] and (message.channel.id == 849723752065531945):
+	if message.embeds != [] and (message.channel.id == 849723752065531945): #check for rolls
 		embed = message.embeds[0].to_dict()
 
-		print(embed["color"])
+		if not "color" in embed.keys():
+			return
+
 		if "Rank".upper() in embed["description"].upper(): #If message is an im message
 			return
 
@@ -49,7 +58,6 @@ async def on_message(message):
 			return
 
 		color = embed["color"]
-		#print(color)
 
 		if color == 16751916: #If the message has a yellow bar (normal roll)
 			character = embed["author"]["name"]
@@ -66,7 +74,7 @@ async def on_message(message):
 			if "Wishlist".upper() in character.upper(): #If someone uses $wishlist
 				return
 
-			if marry_on_cooldown:
+			if not marry_enabled:
 				return
 
 			addCharacterToEmbedsStack((character, message))
@@ -74,6 +82,7 @@ async def on_message(message):
 
 			sleep(0.5)
 			await message.add_reaction("jaichaud:849415484347645962") #Marry the character
+			marry_enabled = False
 
 
 	if message.embeds != [] and (message.channel.id == 863116140795396116): #Handle $im messages
@@ -117,8 +126,6 @@ async def on_message(message):
 				found = True
 			i += 1
 
-		print(gender_description)
-
 		gender = 0
 		if gender_description.find("<:male:452470164529872899>") != - 1:
 			gender += 1
@@ -128,12 +135,47 @@ async def on_message(message):
 
 		addCharacterToDatabase(category, character, gender, price)
 
-		if int(price) > PRICE_AUTOMARRY and not marry_on_cooldown: #If marry is available and the price is high enough
+		if int(price) > PRICE_AUTOMARRY and marry_enabled: #If marry is available and the price is high enough
 			for queueElement in embeds:
 				queueCharacter, queueMessage = queueElement
 				if queueCharacter == character:
 					sleep(0.5)
 					await queueMessage.add_reaction("jaichaud:849415484347645962") #Marry the character
+					marry_enabled = False
+
+
+
+	if message.channel.id == 849723752065531945 and "**Gayben**," in message.content: #If message is for timers
+		message.content = message.content.replace(':', '.')
+		message.content = message.content.replace('!', '.')
+		timers = message.content.split(".")
+
+		if "__" in timers[0]:
+			marry_enabled = True
+
+		marryReset = timers[1]
+		marryReset = marryReset[marryReset.find("**") + 2:]
+		marryReset = marryReset[:marryReset.find("**")]
+
+		r = Timer(convertTimerToMinutes(marryReset)*60.0, enableMarry, ())
+		r.start()
+
+		kakeraReset = timers[4]
+
+		if "__" in kakeraReset:
+			kakera_grabber_enabled = True
+		else:
+			kakeraReset = kakeraReset[kakeraReset.find("**") + 2:]
+			kakeraReset = kakeraReset[:kakeraReset.find("**")]
+
+			r = Timer(convertTimerToMinutes(kakeraReset)*60.0, enableKakeraGrabber, ())
+			r.start()
+
+		print("Timers : ")
+		print("marry_enabled = " + str(marry_enabled))
+		print("kakera_grabber_enabled = " + str(kakera_grabber_enabled))
+
+
 
 		
 @client.event
@@ -142,20 +184,39 @@ async def on_reaction_add(reaction, user): #Kakera grabber
 	global kakera_grabber_enabled
 	if message.embeds != [] and (message.channel.id == 849723752065531945) and user.id == 432610292342587392 and kakera_grabber_enabled: #If message has an embed, in the right channel and from mudae
 		embed = message.embeds[0].to_dict()
-		color = embed["color"]
+
+		if not "color" in embed.keys():
+			return
 
 		if color == 6753288 and ("kakera".upper() in str(reaction).upper()): #If the color is Bordeau (already married roll)
 			if message.reactions != []:
 				sleep(0.5)
 				await message.add_reaction(message.reactions[0].emoji)
 				kakera_grabber_enabled = False
-				r = Timer(3*60*60.0, enableKakeraGrabber, ())
+				r = Timer(3*100*60.0, enableKakeraGrabber, ())
 				r.start()
+
+
+def enableMarry():
+	global marry_enabled
+	marry_enabled = True
+
+	r = Timer(3*60*60.0, enableMarry, ())
+	r.start()
 
 
 def enableKakeraGrabber():
 	global kakera_grabber_enabled
 	kakera_grabber_enabled = True
+
+
+def convertTimerToMinutes(timer):
+	if "h" in timer:
+		timer = timer.replace(" ", "")
+		timer = timer.split("h")
+		timer = int(timer[0]) * 60 + int(timer[1])
+
+	return int(timer)
 
 
 def addCharacterToEmbedsStack(element):
@@ -179,6 +240,14 @@ def addCharacterToDatabase(category, character, gender, price):
 	ON CONFLICT(character)
 	DO UPDATE SET price = :price;""", data)
 	conn.commit()
+
+
+def sandbox():
+	print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+	r = Timer(5.0, sandbox, ())
+	r.start()
+	
+
 
 
 client.run(config.TOKEN)
