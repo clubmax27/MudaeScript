@@ -32,6 +32,12 @@ async def on_ready():
 	MudaeChannel = client.get_channel(849723752065531945)
 	#await MudaeChannel.send("$tu") #Say the price of the character
 
+
+
+	guild = client.get_guild(846817637476204555)
+	member = guild.get_member(242677066372218881)
+	print(member)
+
 	print('Logged on as', client.user)
 
 
@@ -77,8 +83,19 @@ async def on_message(message):
 			addCharacterToEmbedsStack((character, message))
 			await sendImMessage(character)
 
-			sleep(0.8)
+			sleep(1)
 			await message.add_reaction("jaichaud:849415484347645962") #Marry the character
+
+			user = client.get_user(242677066372218881)
+
+			sleep(2)
+			await message.remove_reaction("jaichaud:849415484347645962", user)
+			sleep(0.2)
+
+			for i in range(10):
+				await message.add_reaction("jaichaud:849415484347645962") #Marry the character
+				await message.remove_reaction("jaichaud:849415484347645962", user) #Marry the character
+
 			marry_enabled = False
 
 
@@ -136,13 +153,13 @@ async def on_message(message):
 			for queueElement in embeds:
 				queueCharacter, queueMessage = queueElement
 				if queueCharacter == character:
-					sleep(0.8)
+					sleep(1)
 					await queueMessage.add_reaction("jaichaud:849415484347645962") #Marry the character
 					marry_enabled = False
 
 
 
-	if message.channel.id == 849723752065531945 and "**Gayben**," in message.content: #If message is for timers
+	if message.channel.id == 849723752065531945 and "**Gayben**," in message.content and not "**@Mudaebot**" in message.content: #If message is for timers
 		message.content = message.content.replace(':', '.')
 		message.content = message.content.replace('!', '.')
 		timers = message.content.split(".")
@@ -185,9 +202,10 @@ async def on_reaction_add(reaction, user): #Kakera grabber
 		if not "color" in embed.keys():
 			return
 
+		color = embed["color"]
 		if color == 6753288 and ("kakera".upper() in str(reaction).upper()): #If the color is Bordeau (already married roll)
 			if message.reactions != []:
-				sleep(0.8)
+				sleep(1)
 				await message.add_reaction(message.reactions[0].emoji)
 				kakera_grabber_enabled = False
 				r = Timer(3*100*60.0, enableKakeraGrabber, ())
