@@ -15,6 +15,10 @@ PRICE_AUTOMARRY = 300
 marry_enabled = False
 kakera_grabber_enabled = False
 
+KakeraList = ["KakeraP", "KakeraG", "KakeraY", "KakeraO", "KakeraR", "KakeraW", "KakeraL"]
+KakeraList = [element.upper() for element in KakeraList]
+print(KakeraList)
+
 
 @client.event
 async def on_ready():
@@ -31,12 +35,6 @@ async def on_ready():
 
 	MudaeChannel = client.get_channel(849723752065531945)
 	#await MudaeChannel.send("$tu") #Say the price of the character
-
-
-
-	guild = client.get_guild(846817637476204555)
-	member = guild.get_member(242677066372218881)
-	print(member)
 
 	print('Logged on as', client.user)
 
@@ -194,8 +192,11 @@ async def on_message(message):
 		
 @client.event
 async def on_reaction_add(reaction, user): #Kakera grabber
-	message = reaction.message
 	global kakera_grabber_enabled
+	global KakeraList
+
+	message = reaction.message
+
 	if message.embeds != [] and (message.channel.id == 849723752065531945) and user.id == 432610292342587392 and kakera_grabber_enabled: #If message has an embed, in the right channel and from mudae
 		embed = message.embeds[0].to_dict()
 
@@ -203,8 +204,13 @@ async def on_reaction_add(reaction, user): #Kakera grabber
 			return
 
 		color = embed["color"]
-		if color == 6753288 and ("kakera".upper() in str(reaction).upper()): #If the color is Bordeau (already married roll)
-			if message.reactions != []:
+		if ("kakera".upper() in str(reaction).upper()): #If the reaction is about a kakera
+
+			kakeraType = str(message.reactions[0]).upper()
+			kakeraType = kakeraType[kakeraType.find(":") + 1:]
+			kakeraType = kakeraType[:kakeraType.find(":")]
+
+			if message.reactions != [] and kakeraType in KakeraList:
 				sleep(1)
 				await message.add_reaction(message.reactions[0].emoji)
 				kakera_grabber_enabled = False
