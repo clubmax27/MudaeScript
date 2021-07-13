@@ -75,11 +75,11 @@ async def on_message(message):
 			character = embed["author"]["name"]
 			print(character)
 
-			if not marry_enabled:
-				return
-
 			addCharacterToEmbedsStack((character, message))
 			await sendImMessage(character)
+
+			if not marry_enabled:
+				return
 
 			sleep(1)
 			await message.add_reaction("jaichaud:849415484347645962") #Marry the character
