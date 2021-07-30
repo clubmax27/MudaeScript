@@ -1,5 +1,4 @@
 discord.py-self
-math
 re
 collections
 time
