@@ -13,7 +13,7 @@ client = discord.Client()
 embeds = deque([], 10)
 acceptedChannels = [863116140795396116]
 
-PRICE_AUTOMARRY = 300
+PRICE_AUTOMARRY = 301
 
 marry_enabled = False
 kakera_grabber_enabled = False
