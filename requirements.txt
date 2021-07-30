@@ -1,9 +1,1 @@
 discord.py-self
-re
-collections
-time
-config
-sqlite3
-threading
-asyncio
-sys
