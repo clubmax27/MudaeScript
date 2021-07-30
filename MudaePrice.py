@@ -8,6 +8,7 @@ import sqlite3
 from threading import Timer
 import time
 import asyncio
+import sys
 
 client = discord.Client()
 embeds = deque([], 10)
@@ -82,6 +83,7 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
+	sys.stdout.flush()
 	#print(message)
 
 	global marry_enabled
