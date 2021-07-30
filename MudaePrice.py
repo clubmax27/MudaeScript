@@ -75,8 +75,8 @@ async def on_ready():
 	""")
 	conn.commit()
 
-	MudaeChannel = client.get_channel(849723752065531945)
-	#await MudaeChannel.send("$tu") #Say the price of the character
+	MudaeChannel = client.get_channel(863116140795396116)
+	await MudaeChannel.send("$tu") #Say the price of the character
 
 	print('Logged on as', client.user)
 
