@@ -6,19 +6,52 @@ from time import sleep
 import config
 import sqlite3
 from threading import Timer
-
+import time
+import asyncio
 
 client = discord.Client()
 embeds = deque([], 10)
 acceptedChannels = [863116140795396116]
+
 PRICE_AUTOMARRY = 300
+
 marry_enabled = False
 kakera_grabber_enabled = False
 
-KakeraList = ["KakeraP", "KakeraG", "KakeraY", "KakeraO", "KakeraR", "KakeraW", "KakeraL"]
-KakeraList = [element.upper() for element in KakeraList]
-print(KakeraList)
+timerMarry = Timer(1000000, (), ())
+timerKakera = Timer(1000000, (), ())
 
+timerMarry.start()
+timerKakera.start()
+
+KakeraList = ["KakeraG", "KakeraY", "KakeraO", "KakeraR", "KakeraW", "KakeraL"]
+KakeraList = [element.upper() for element in KakeraList]
+
+WishList = ["Hyo-in Lee", "Sungjoon Bae", "Yeonsoo Lee", "Bin Joo", #Make me bark
+			"Azusa Hamaoka", "Necai Sys", "Iris Heart", #Purple bitch
+			"Moeka Kiryuu", "Itaru Hashida", "Yuugo Tennouji", #Steins;Gate
+			"Gwonam", "Morshu", #Zelda CDi Series
+			"Sebastian", "Leah (SDV)", "Penny (SDV)", "Haley", "Harvey", #stardew valley
+			"Pulptenks Flanders", #cute girls
+			"Madeline", "Badeline", "Theo", "Old Woman", "Mr. Oshiro", #Celeste
+			"Buttercup", "Tails", "Chat Noir", "Jessie", "Felindra",  #Collection de Duos/Trios
+			"Faker", "Sneaky", "Tryndamere", #League of Legends
+			"Reuben (MCSM)", "Brody Foxx", "Linus Sebastian", "Splat Tim", "RNGesus", #Memes
+			"Emmanuel Macron", #political figures
+			"Kat (P&C)", "Catra", "Annie Brown", #Vol honteux (Laffey)
+			"Helltaker", "Subject 67", #Helltaker
+			"Marvin", "Tiara (Petscop)", #Petscop
+			"Princess Bubblegum", "Marceline", #Adventure Time
+			"Franz Hopper", "Jim Moralès", "Jeremie Belpois", #Code Lyoko
+			"Rainbow Dash", "Applejack", "Princess Luna", "Princess Celestia", "Discord", "Sunset Shimmer", "Starlight Glimmer", #MLP
+			"Hime Hajime", "Veibae", #VShojo (Laffey)
+			"Alice Mizuki", "Masami Eiri", "Miho Iwakura", "Myu-Myu", "Taro", "Yasuo Iwakura", #Serial Experiments Lain
+			"Ashley Rosemarry", "Nikki Ann-Marie", "Aiko Yumi", "Jessie Maye", "Audrey Belrose", "Theiatena Venus", "Momo (HP)", "Celeste Luvendass", "Tiffany Maye", "Lola Rembrite", "Beli Lapran" #HuniePop
+			"Bill Cipher", "Dipper Pines", "Waddles", "Ford Pines", "Soos Ramirez", "Giffany", "Pacifica Northwest", "Shmebulock", "Fiddleford McGucket", "Robbie Valentino", "Gompers", "Candy Chiu", "Gideon Gleeful", "8 Ball", "Blendin Blandin", "Tyler Cutebiker", "Justin Kerprank", #Gravity Falls
+			"Snatcher", "The Conductor", "Mustache Girl", "DJ Grooves", "Cooking Cat", "The Empress", "Mafia Boss", "Badge Seller", #A Hat In Time
+			"Acca", "Kaoru Kurita", "Mako (WEP)", "Panic", "Ura-Acca"] #Wonder Egg Priority
+
+print(KakeraList)
 
 @client.event
 async def on_ready():
@@ -29,7 +62,16 @@ async def on_ready():
 		category TEXT,
     	character TEXT UNIQUE,
     	gender INTEGER,
-    	price INTEGER)
+    	price INTEGER,
+    	dropCount INTEGER);
+	""")
+	conn.commit()
+
+	cursor.execute("""
+    	CREATE TABLE IF NOT EXISTS dateLogging(
+    	character TEXT,
+    	timestamp INTEGER,
+    	isWish BOOL);
 	""")
 	conn.commit()
 
@@ -38,11 +80,17 @@ async def on_ready():
 
 	print('Logged on as', client.user)
 
-
 @client.event
 async def on_message(message):
+	#print(message)
+
 	global marry_enabled
 	global kakera_grabber_enabled
+
+	global timerMarry
+	global timerKakera
+
+	global WishList
 
 	#if message.embeds == [] or message.embeds[0].to_dict()["color"] == undefined:
 	#	return
@@ -51,6 +99,11 @@ async def on_message(message):
 	#print(message.channel.id)
 	if message.embeds != [] and (message.channel.id == 849723752065531945): #check for rolls
 		embed = message.embeds[0].to_dict()
+
+		if "prendra grand soin de".upper() in message.content.upper(): #If I marry a charcter
+			marry_enabled = False
+			print("Married a character")
+			return
 
 		if not "color" in embed.keys():
 			return
@@ -69,32 +122,31 @@ async def on_message(message):
 
 			addCharacterToEmbedsStack((character, message))
 			await sendImMessage(character)
+			addRollToDatabase(character, False)
+
+			if character in WishList:
+				sleep(1)
+				await message.add_reaction("⭐") #Marry the character
 
 
 		if "Souhaité par" in message.content: #If message has a green bar (wish related)
 			character = embed["author"]["name"]
-			print(character)
-
-			addCharacterToEmbedsStack((character, message))
-			await sendImMessage(character)
+			print("WISH : " + character)
 
 			if not marry_enabled:
 				return
 
-			sleep(1)
-			await message.add_reaction("jaichaud:849415484347645962") #Marry the character
+			if "(Series)" in message.content:
+				return
 
-			user = client.get_user(242677066372218881)
+			await asyncio.gather(
+			    AsyncWishMarry(message),
+			    ContinuationOfFunction(message)
+			)
 
-			sleep(2)
-			await message.remove_reaction("jaichaud:849415484347645962", user)
-			sleep(0.2)
-
-			for i in range(10):
-				await message.add_reaction("jaichaud:849415484347645962") #Marry the character
-				await message.remove_reaction("jaichaud:849415484347645962", user) #Marry the character
-
-			marry_enabled = False
+			addCharacterToEmbedsStack((character, message))
+			await sendImMessage(character)
+			addRollToDatabase(character, True)
 
 
 	if message.embeds != [] and (message.channel.id == 863116140795396116): #Handle $im messages
@@ -117,7 +169,7 @@ async def on_message(message):
 		price = kakera_description #Keep the original description for future use
 		price = price[price.find("**") + 2:]
 		price = price[:price.find("**")]
-		price = str(math.floor(int(price) * 1.52)) #The price on Tijimu's server is higher for some reason
+		price = str(math.floor(int(price) * 1.7) + 1)  #The price on Tijimu's server is higher for some reason
 		print(price)
 
 		MudaeChannel = client.get_channel(863116140795396116)
@@ -147,13 +199,13 @@ async def on_message(message):
 
 		addCharacterToDatabase(category, character, gender, price)
 
+
 		if int(price) > PRICE_AUTOMARRY and marry_enabled: #If marry is available and the price is high enough
 			for queueElement in embeds:
 				queueCharacter, queueMessage = queueElement
 				if queueCharacter == character:
 					sleep(1)
-					await queueMessage.add_reaction("jaichaud:849415484347645962") #Marry the character
-					marry_enabled = False
+					await queueMessage.add_reaction("⭐") #Marry the character
 
 
 
@@ -164,24 +216,33 @@ async def on_message(message):
 
 		if "__" in timers[0]:
 			marry_enabled = True
+		else:
+			marry_enabled = False
 
 		marryReset = timers[1]
 		marryReset = marryReset[marryReset.find("**") + 2:]
 		marryReset = marryReset[:marryReset.find("**")]
 
-		r = Timer(convertTimerToMinutes(marryReset)*60.0, enableMarry, ())
-		r.start()
+		timerMarry.cancel()
+		timerMarry = Timer(convertTimerToMinutes(marryReset)*60.0, enableMarry, ())
+		timerMarry.start()
 
 		kakeraReset = timers[4]
+
+		if "$daily" in kakeraReset:
+			kakeraReset = timers[5]
 
 		if "__" in kakeraReset:
 			kakera_grabber_enabled = True
 		else:
+			kakera_grabber_enabled = False
+
 			kakeraReset = kakeraReset[kakeraReset.find("**") + 2:]
 			kakeraReset = kakeraReset[:kakeraReset.find("**")]
 
-			r = Timer(convertTimerToMinutes(kakeraReset)*60.0, enableKakeraGrabber, ())
-			r.start()
+			timerKakera.cancel()
+			timerKakera = Timer(convertTimerToMinutes(kakeraReset)*60.0, enableKakeraGrabber, ())
+			timerKakera.start()
 
 		print("Timers : ")
 		print("marry_enabled = " + str(marry_enabled))
@@ -197,7 +258,7 @@ async def on_reaction_add(reaction, user): #Kakera grabber
 
 	message = reaction.message
 
-	if message.embeds != [] and (message.channel.id == 849723752065531945) and user.id == 432610292342587392 and kakera_grabber_enabled: #If message has an embed, in the right channel and from mudae
+	if message.embeds != [] and (message.channel.id == 849723752065531945) and user.id == 432610292342587392: #If message has an embed, in the right channel and from mudae
 		embed = message.embeds[0].to_dict()
 
 		if not "color" in embed.keys():
@@ -210,25 +271,44 @@ async def on_reaction_add(reaction, user): #Kakera grabber
 			kakeraType = kakeraType[kakeraType.find(":") + 1:]
 			kakeraType = kakeraType[:kakeraType.find(":")]
 
-			if message.reactions != [] and kakeraType in KakeraList:
-				sleep(1)
+			if (kakera_grabber_enabled and (kakeraType in KakeraList)) or (kakeraType.upper() == "KakeraP".upper()):
+				sleep(0.7)
 				await message.add_reaction(message.reactions[0].emoji)
 				kakera_grabber_enabled = False
-				r = Timer(3*100*60.0, enableKakeraGrabber, ())
-				r.start()
+				print("Grabbed a kakera (" + kakeraType + ")")
+
+async def sayMessage(msg, delay):
+	await asyncio.sleep(delay)
+	print(msg)
+
+async def AsyncWishMarry(msg):
+	await asyncio.sleep(8.5)
+	await msg.add_reaction("⭐")
+
+async def ContinuationOfFunction(message):
+	sleep(0.9)
+	await message.add_reaction("⭐") #Marry the character
+
+	user = client.get_user(242677066372218881)
+
+	sleep(1)
+
+	await message.remove_reaction("⭐", user)
+
 
 
 def enableMarry():
 	global marry_enabled
 	marry_enabled = True
 
-	r = Timer(3*60*60.0, enableMarry, ())
-	r.start()
+	print("Marry re-enabled")
 
 
 def enableKakeraGrabber():
 	global kakera_grabber_enabled
 	kakera_grabber_enabled = True
+
+	print("Kakera grabber re-enabled")
 
 
 def convertTimerToMinutes(timer):
@@ -253,22 +333,39 @@ async def sendImMessage(character):
 def addCharacterToDatabase(category, character, gender, price):
 	conn = sqlite3.connect('mudae.db')
 	cursor = conn.cursor()
-	data = {"category" : category, "character" : character, "gender" : gender, "price" : price}
 
-	cursor.execute("""
-	INSERT INTO roulette(category, character, gender, price) 
-	VALUES(:category, :character, :gender, :price)
-	ON CONFLICT(character)
-	DO UPDATE SET price = :price;""", data)
-	conn.commit()
+	dropCount = 0
 
+	cursor.execute("""SELECT character, dropCount FROM roulette""")
+	rows = cursor.fetchall()
+	for row in rows:
+		if(row[0] == character):
+			dropCount = row[1]
 
-def sandbox():
-	print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
-	r = Timer(5.0, sandbox, ())
-	r.start()
+	if dropCount == 0:
+		data = {"category" : category, "character" : character, "gender" : gender, "price" : price}
+
+		cursor.execute("""
+		INSERT INTO roulette(category, character, gender, price, dropCount) 
+		VALUES(:category, :character, :gender, :price, 1);""", data)
+		conn.commit()
+
+	else:
+		data = {"character" : character, "price" : price, "dropCount" : dropCount + 1}
+
+		cursor.execute("""UPDATE roulette SET price = :price, dropCount = :dropCount WHERE character = :character""", data)
+		conn.commit()
 	
 
+def addRollToDatabase(character, isWish):
+	conn = sqlite3.connect('mudae.db')
+	cursor = conn.cursor()
 
+	data = {"character" : character, "timestamp" : int(time.time()), "isWish" : isWish}
+
+	cursor.execute("""
+	INSERT INTO dateLogging(character, timestamp, isWish) 
+	VALUES(:character, :timestamp, :isWish);""", data)
+	conn.commit()
 
 client.run(config.TOKEN)
