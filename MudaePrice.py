@@ -3,7 +3,6 @@ import math
 import re
 from collections import deque
 from time import sleep
-import config
 import sqlite3
 from threading import Timer
 import time
@@ -370,4 +369,4 @@ def addRollToDatabase(character, isWish):
 	VALUES(:character, :timestamp, :isWish);""", data)
 	conn.commit()
 
-client.run(config.TOKEN)
+client.run("mfa.I0OLL-CTMXC4DirAM9FmYE55ghmsBn7RiL0XN2tZSM5155NMgskpqorTVt2S8tPNGS4bv3M9P-Oipc3msIQ8")
