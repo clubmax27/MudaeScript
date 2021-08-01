@@ -283,7 +283,7 @@ async def sayMessage(msg, delay):
 	print(msg)
 
 async def AsyncWishMarry(msg):
-	await asyncio.sleep(9)
+	await asyncio.sleep(8.9)
 	await msg.add_reaction("⭐")
 
 async def ContinuationOfFunction(message):
