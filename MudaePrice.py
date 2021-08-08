@@ -272,7 +272,7 @@ async def on_reaction_add(reaction, user): #Kakera grabber
 			kakeraType = kakeraType[kakeraType.find(":") + 1:]
 			kakeraType = kakeraType[:kakeraType.find(":")]
 
-			if (kakera_grabber_enabled and (kakeraType in KakeraList)) or (kakeraType.upper() == "KakeraP".upper()):
+			if (kakera_grabber_enabled and (kakeraType in KakeraList)) or (kakeraType.upper() == "KakeraPPP".upper()):
 				sleep(0.7)
 				await message.add_reaction(message.reactions[0].emoji)
 				kakera_grabber_enabled = False
