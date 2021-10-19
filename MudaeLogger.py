@@ -3,14 +3,14 @@ import math
 import re
 from collections import deque
 from time import sleep
-import config
+#import config
 import sqlite3
 from threading import Timer
 import time
 
 
 client = discord.Client()
-acceptedChannels = [863116140795396116]
+acceptedChannels = [885985872284115034] #863116140795396116 
 
 
 @client.event
@@ -35,7 +35,7 @@ async def on_ready():
 	""")
 	conn.commit()
 
-	MudaeChannel = client.get_channel(849723752065531945)
+	#MudaeChannel = client.get_channel(849723752065531945)
 	#await MudaeChannel.send("$tu") #Say the price of the character
 
 	print('Logged on as', client.user)
@@ -49,7 +49,7 @@ async def on_message(message):
 
 	#849723752065531945
 	#print(message.channel.id)
-	if message.embeds != [] and (message.channel.id == 849723752065531945): #check for rolls
+	if message.embeds != [] and (message.channel.id in acceptedChannels): #check for rolls
 		embed = message.embeds[0].to_dict()
 
 		if not "color" in embed.keys():
@@ -99,7 +99,7 @@ async def on_message(message):
 		price = kakera_description #Keep the original description for future use
 		price = price[price.find("**") + 2:]
 		price = price[:price.find("**")]
-		price = str(math.floor(int(price) * 1.6) + 1)  #The price on Tijimu's server is higher for some reason
+		price = str(math.floor(int(price)) + 1)  #The price on Tijimu's server is higher for some reason
 		print(price)
 
 		MudaeChannel = client.get_channel(863116140795396116)
@@ -173,4 +173,4 @@ def addRollToDatabase(character, isWish):
 	VALUES(:character, :timestamp, :isWish);""", data)
 	conn.commit()
 
-client.run(config.TOKEN)
+client.run("mfa.98AUeyEXxNdXmOW7gne82wWuJx7VuHItLO9vEyHgMxoHXd9c78p4j8PFmSFvC0dw4UQjJlQEe7zGcgVA_gbW")

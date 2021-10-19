@@ -24,32 +24,32 @@ timerKakera = Timer(1000000, (), ())
 timerMarry.start()
 timerKakera.start()
 
-KakeraList = ["KakeraG", "KakeraY", "KakeraO", "KakeraR", "KakeraW", "KakeraL"]
+KakeraList = ["KakeraY", "KakeraO", "KakeraR", "KakeraW", "KakeraL"]
 KakeraList = [element.upper() for element in KakeraList]
 
-WishList = ["Hyo-in Lee", "Sungjoon Bae", "Yeonsoo Lee", "Bin Joo", #Make me bark
+WishList = [#"Hyo-in Lee", "Sungjoon Bae", "Yeonsoo Lee", "Bin Joo", #Make me bark
 			"Azusa Hamaoka", "Necai Sys", "Iris Heart", #Purple bitch
-			"Moeka Kiryuu", "Itaru Hashida", "Yuugo Tennouji", #Steins;Gate
-			"Gwonam", "Morshu", #Zelda CDi Series
+			#"Alexis Leskinen", "Eisuke Urushibara", "Judy Reyes", "Kaede Kurushima", "Kagari Shiina", "Katsumi Nakase", "Kayano", "Kuroki", "Maho Hiyajo", "Nae Tennouji", "Nakabachi", "Street Vendor", "Yuki Amane", "Yukitaka Akiha", "Yuugo Tennouji", "Moeka Kiryuu", "Itaru Hashida", #Steins;Gate
+			"Ganon (CDi)", "Gwonam", "King Harkinian", "Link (CDi)", "Morshu", "Zelda (CDi)", #Zelda CDi Series
 			"Sebastian", "Leah (SDV)", "Penny (SDV)", "Haley", "Harvey", #stardew valley
 			"Pulptenks Flanders", #cute girls
-			"Madeline", "Badeline", "Theo", "Old Woman", "Mr. Oshiro", #Celeste
-			"Buttercup", "Tails", "Chat Noir", "Jessie", "Felindra",  #Collection de Duos/Trios
+			"Madeline", "Badeline", #"Theo", "Old Woman", "Mr. Oshiro", #Celeste
+			#"Buttercup", "Tails", "Chat Noir", "Jessie", "Felindra",  #Collection de Duos/Trios
 			"Faker", "Sneaky", "Tryndamere", #League of Legends
-			"Reuben (MCSM)", "Brody Foxx", "Linus Sebastian", "Splat Tim", "RNGesus", #Memes
-			"Emmanuel Macron", #political figures
+			#"Reuben (MCSM)", "Brody Foxx", "Linus Sebastian", "Splat Tim", "RNGesus", #Memes
+			"Emmanuel Macron", "Marine Le Pen", "Jean-Marie Le Pen", #political figures
 			"Kat (P&C)", "Catra", "Annie Brown", #Vol honteux (Laffey)
-			"Helltaker", "Subject 67", #Helltaker
-			"Marvin", "Tiara (Petscop)", #Petscop
-			"Princess Bubblegum", "Marceline", #Adventure Time
-			"Franz Hopper", "Jim Moralès", "Jeremie Belpois", #Code Lyoko
-			"Rainbow Dash", "Applejack", "Princess Luna", "Princess Celestia", "Discord", "Sunset Shimmer", "Starlight Glimmer", #MLP
+			"Azazel (HT)", "Beelzebub (HT)", "Helltaker", "Judgement", "Justice", "Lucifer", "Malina", "Modeus", "Pandemonica", "Subject 67", "Zdrada", #Helltaker
+			#"Marvin", "Tiara (Petscop)", #Petscop
+			"BMO", "Princess Finn", "Princess Bubblegum", "Marceline", #Adventure Time
+			"Aelita", #"Yumi Ishiyama", "Odd Della Robbia", "Ulrich Stern", "Franz Hopper", "Jim Moralès", "Jeremie Belpois", #Code Lyoko
+			"Rainbow Dash", "Element of Kindness", "Twilight Sparkle", "Pinkie Pie", "Rarity", "Applejack", "Princess Luna", "Princess Celestia", "Discord", "Sunset Shimmer", "Starlight Glimmer",  #MLP
 			"Hime Hajime", "Veibae", #VShojo (Laffey)
-			"Alice Mizuki", "Masami Eiri", "Miho Iwakura", "Myu-Myu", "Taro", "Yasuo Iwakura", #Serial Experiments Lain
-			"Ashley Rosemarry", "Nikki Ann-Marie", "Aiko Yumi", "Jessie Maye", "Audrey Belrose", "Theiatena Venus", "Momo (HP)", "Celeste Luvendass", "Tiffany Maye", "Lola Rembrite", "Beli Lapran" #HuniePop
-			"Bill Cipher", "Dipper Pines", "Waddles", "Ford Pines", "Soos Ramirez", "Giffany", "Pacifica Northwest", "Shmebulock", "Fiddleford McGucket", "Robbie Valentino", "Gompers", "Candy Chiu", "Gideon Gleeful", "8 Ball", "Blendin Blandin", "Tyler Cutebiker", "Justin Kerprank", #Gravity Falls
-			"Snatcher", "The Conductor", "Mustache Girl", "DJ Grooves", "Cooking Cat", "The Empress", "Mafia Boss", "Badge Seller", #A Hat In Time
-			"Acca", "Kaoru Kurita", "Mako (WEP)", "Panic", "Ura-Acca"] #Wonder Egg Priority
+			#"Alice Mizuki", "Mika Iwakura", "Chisa Yomoda", "Reika Yamamoto", "Juri Katou (SEL)", "Karl Haushofer", "Lin Sui-Xi", "Masami Eiri", "Miho Iwakura", "Myu-Myu", "Taro", "Yasuo Iwakura", #Serial Experiments Lain
+			#"Ashley Rosemarry", "Nikki Ann-Marie", "Aiko Yumi", "Jessie Maye", "Audrey Belrose", "Theiatena Venus", "Momo (HP)", "Celeste Luvendass", "Tiffany Maye", "Lola Rembrite", "Beli Lapran" #HuniePop
+			"Bill Cipher", "Dipper Pines", "Waddles", "Ford Pines", "Soos Ramirez",  "Gideon Gleeful", #"Giffany", "Pacifica Northwest", "Shmebulock", "Fiddleford McGucket", "Robbie Valentino", "Gompers", "Candy Chiu", #"8 Ball", "Blendin Blandin", "Tyler Cutebiker", "Justin Kerprank", #Gravity Falls
+			"Hat Kid", #"Rumbi", "Bow Kid", "Snatcher", "The Conductor", "Mustache Girl", "DJ Grooves", "Cooking Cat", "The Empress", "Mafia Boss", "Badge Seller", #A Hat In Time
+			"Acca", "Ai Ohto", "Chiaki Kawai", "Frill", "Kaoru Kurita", "Kirara (WEP)", "Koito Nagase", "Kotobuki Awano", "Kurumi Saijo", "Leon (WEP)", "Mako (WEP)", "Mannen", "Miko (WEP)", "Minami Suzuhara", "Misaki Tanabe", "Momoe Sawaki", "Neiru Aonuma", "Panic", "Pinky (WEP)", "Rika Kawai", "Shuichirou Sawaki", "Tae Ohto", "Ura-Acca", "Yae Yoshida"] #Wonder Egg Priority
 
 print(KakeraList)
 
@@ -174,7 +174,7 @@ async def on_message(message):
 		print(price)
 
 		MudaeChannel = client.get_channel(863116140795396116)
-		await MudaeChannel.send("GaybenSay " + character + " : " + price) #Say the price of the character
+		#await MudaeChannel.send("GaybenSay " + character + " : " + price) #Say the price of the character
 
 
 		category = kakera_description.split("·")[0]
@@ -369,4 +369,4 @@ def addRollToDatabase(character, isWish):
 	VALUES(:character, :timestamp, :isWish);""", data)
 	conn.commit()
 
-client.run("mfa.I0OLL-CTMXC4DirAM9FmYE55ghmsBn7RiL0XN2tZSM5155NMgskpqorTVt2S8tPNGS4bv3M9P-Oipc3msIQ8")
+client.run("mfa.98AUeyEXxNdXmOW7gne82wWuJx7VuHItLO9vEyHgMxoHXd9c78p4j8PFmSFvC0dw4UQjJlQEe7zGcgVA_gbW")
